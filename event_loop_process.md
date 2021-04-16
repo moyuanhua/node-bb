@@ -19,16 +19,16 @@
    └───────────────────────┘
 ```
 > 上图是node里面的event loop的示意图  原文 [The Node.js Event Loop, Timers, and process.nextTick()](https://github.com/nodejs/node/blob/v6.x/doc/topics/event-loop-timers-and-nexttick.md) 
-1. 从上往下一次轮询 node的 event_loop
-2. 每一个阶段都是一个 FIFO 的队列 
-3. 每一个阶段都处理到这个阶段为空或者达到node的最大限制
-4. 在poll阶段处理我们的代码的回调或者timer（settimeout，setImmediate）等的回调
-5.  process.nextTick 不输入任何一个阶段 会阻塞事件轮询 所以不建议使用
+1. 所有任务都在主线程上执行，形成一个执行栈(Execution Context Stack)
+2. 在主线程之外还存在一个任务队列(Task Queen),系统把异步任务放到任务队列中，然后主线程继续执行后续的任务
+3. 一旦执行栈中所有的任务执行完毕，系统就会读取任务队列。如果这时异步任务已结束等待状态，就会从任务队列进入执行栈，恢复执行
+4. 主线程不断重复上面的第三步
+
+#### [解读setTimeout, promise.then, process.nextTick, setImmediate的执行顺序](https://www.cnblogs.com/jesse131/p/11708233.html) 讲的太棒了 醍醐灌顶
+
 
 * 通过下面的代码实践我们可以发现  process.nextTick 
-> 当后台有 process.nextTick 的递归调用的时候 我们的http服务无法处理外部的请求 证明 event_loop被阻塞了 
-*  settimeout 和 setImmediate 不一样 
-> 如果是这两者的递归 其实是在加入了timer的队列里面 event_loop 在正常的进行
+* settimeout 和 setImmediate 不一样 
 
 
 
@@ -168,11 +168,3 @@ server.listen(7001)
         console.log('after nextick')
 })
 ```
-
-那为什么会有这种结果呢， 我猜测第二中写法里面sleep其实是个timer 把timer加入到 timer的队列以后 process.nextTick 就结束了
-而第一种写法要等到同步的sleep结束之后才会把process.nextTick结束
-
-## 结论
-* 正确的理解 node 的 event_loop 很重要 是node实现高并发基础
-* 在代码里面尽量少使用 process.nextTick
-* 以上的东西是我瞎写的 但是都是实践过的 node 最近的新的文档好少 我来补充一下
