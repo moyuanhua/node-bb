@@ -165,4 +165,63 @@ console.log(5); //7. 同步任务
 
 #### Event
 
+* 通过继承 EventEmitter 来使得一个类具有 node 提供的基本的 event 方法, 这样的对象可以称为emiiter
+
+>  Q: 如何通过继承来实现一个Event类 非extents写法
+``` JAVASCRIPT
+const EventEmitter = require('events')
+// const { inherits } = require('util')
+function inherits(ctor, superCtor) {
+    Object.defineProperty(ctor, 'super_', {
+        value: superCtor,
+        writable: true,
+        configurable: true
+    })
+    Object.setPrototypeOf(ctor.prototype, superCtor.prototype)
+}
+
+function Event() {
+    EventEmitter.call(this) // 以This为主体触发EventEmitter的方法
+}
+inherits(Event, EventEmitter) // 实现继承
+
+let newevent = new Event();
+newevent.on('event1', () => {
+    console.log(1)
+})
+newevent.emit('event1')
+```
+
+> Q: Eventemitter 的 emit 是同步还是异步?
+
+> A: 是同步的
+```JAVASCRIPT
+// 这段代码会死循环
+const EventEmitter = require('events');
+
+let emitter = new EventEmitter();
+
+emitter.on('myEvent', () => {
+  console.log('hi');
+  emitter.emit('myEvent');
+});
+
+emitter.emit('myEvent');
+```
+
+```JAVASCRIPT
+// 这段代码可能会导致内存益处 因为对sth的引用没有释放
+const EventEmitter = require('events');
+
+let emitter = new EventEmitter();
+
+emitter.on('myEvent', function sth () {
+  emitter.on('myEvent', sth);
+  console.log('hi');
+});
+
+emitter.emit('myEvent');
+```
+
+#### 阻塞/异步
 
