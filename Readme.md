@@ -1,6 +1,6 @@
 1. [关于node里面的console.log输出的性能问题](./console_log.md)
 2. [event_loop,process_nextTick,setTimeout,setImmadiata](./event_loop_process.md)
-
+3. [如何写一篇优秀的简历](https://www.zhihu.com/question/21520021/answer/1832490006)
 
 
 
@@ -224,4 +224,83 @@ emitter.emit('myEvent');
 ```
 
 #### 阻塞/异步
+> Q: 如何判断接口是否异步？ 是否只要有回调函数就是异步？ 
 
+* 不是 要看回调的类型 比如 settimeout settimmidate process.nextTick 就是异步
+* 涉及到I/O操作 比如网络请求 文件操作等都是异步
+> 以下代码的回调就是同步
+``` JavaScript
+function a(cb) {
+    console.log('before cb')
+    cb();
+    console.log('after cb')
+}
+a(() => {
+    console.log('in cb')
+})
+console.log('after a')
+```
+
+> Q: 如何实现一个异步的 reduce? (注:不是异步完了之后同步 reduce)
+``` JavaScript
+const asyncPlus = (a, b) => {
+    return new Promise((resolve, reject) => {
+        setTimeout(resolve.bind(this, a + b), 0);
+    });
+}
+
+const getTotal = [1, 2, 3, 4].reduce((accumulator, currentValue) => {
+    return Promise.resolve(accumulator).then((result) => {
+        return asyncPlus(result, currentValue);
+    });
+});
+
+getTotal.then((total) => {
+    console.log(total);
+});
+
+```
+
+#### 并行/并发
+> 并发 (Concurrent) = 2 队列对应 1 咖啡机.
+
+>并行 (Parallel) = 2 队列对应 2 咖啡机.
+
+>Node.js 通过事件循环来挨个抽取事件队列中的一个个 Task 执行, 从而避免了传统的多线程情况下 2个队列对应 1个咖啡机 的时候上下文切换以及资源争抢/同步的问题, 所以获得了高并发的成就.
+
+>至于在 node 中并行, 你可以通过 **cluster** 来再添加一个咖啡机.
+
+### 进程 Cluster
+[事件轮询相关event_loop,process_nextTick,setTimeout,setImmadiata](./event_loop_process.md)
+> cluster 是实现node多进程的核心模块 它是基于 child_process.fork() 实现的, 所以 cluster 产生的进程之间是通过 IPC 来通信的
+
+#### 进程间通信（IPC）
+> 普通的 socket 是为网络通讯设计的, 而网络本身是不可靠的, 而为 IPC 设计的 socket 则不然, 因为默认本地的网络环境是可靠的, 所以可以简化大量不必要的 encode/decode 以及计算校验等, 得到效率更高的 UDS 通信.
+
+### IO
+#### Buffer 
+> r. Buffer 类的实例非常类似整数数组, 但其大小是固定不变的
+#### Stream
+> Node.js 内置的 stream 模块是多个核心模块的基础 NetWork Http Fs
+#### pipe
+> pipe 方法最主要的目的就是将数据的流动缓冲到一个可接受的水平, 不让不同速度的数据源之间的差异导致内存被占满.
+
+> 使用流和pipe下载文件和直接把文件读取到内存下载的区别是什么？ 
+>> 一个内存会爆 一个可以通过pipe控制减少内存消耗
+
+#### Console
+ [关于node里面的console.log输出的性能问题](./console_log.md)
+
+### NetWork
+* cookie 与 session 的区别? 服务端如何清除 cookie? [more]
+  > 主要区别在于, session 存在服务端, cookie 存在客户端. session 比 cookie 更安全. 而且 cookie 不一定一直能用 (可能被浏览器关掉). 服务端可以通过设置 cookie 的值为空并设置一个及时的 expires 来清除存在客户端上的 cookie.
+* HTTP 协议中的 POST 和 PUT 有什么区别? [more]
+  > POST 是新建 (create) 资源, 非幂等, 同一个请求如果重复 POST 会新建多个资源. PUT 是 Update/Replace, 幂等, 同一个 PUT 请求重复操作会得到同样的结果.
+* 什么是跨域请求? 如何允许跨域? [more]
+  > 
+* TCP/UDP 的区别? TCP 粘包是怎么回事，如何处理? UDP 有粘包吗? [more]
+* TIME_WAIT 是什么情况? 出现过多的 TIME_WAIT 可能是什么原因? [more]
+* ECONNRESET 是什么错误? 如何复现这个错误?
+* socket hang up 是什么意思? 可能在什么情况下出现? [more]
+* hosts 文件是什么? 什么叫 DNS 本地解析?
+* 列举几个提高网络传输速度的办法?
