@@ -292,12 +292,35 @@ getTotal.then((total) => {
  [关于node里面的console.log输出的性能问题](./console_log.md)
 
 ### NetWork
+
+* 如何理解TCP/IP 和 HTTP的关系是什么. 请看[一针见血的讲解](https://mp.weixin.qq.com/s/TMe5QsBL6t6YPt_vLHNZ6w)
+
+  > 如果我们把TCP/IP理解成物流运输里面的快递公司/运货司机 HTTP就是发货人和收货人 。 TCP/IP是为HTTP服务的 TCP负责数据包的发送/接收与重发(在TCP的头部定义了SCOKET端口号，包校验等信息，对应我们运货中的地址和人)，IP负责数据在网络中链路传输（在IP的头部里面定义了目标IP和源IP，通过DNS等路由的手段把数据传输到目的地， 在这个过程中可能出现意外会导致数据没有送到，此时TCP就负责重新发送一份数据）。
+
+  > 而HTTP(我们常说HTTP服务端，HTTP客户端就是作为收货人和发货人) 在接收到数据后按照协议解析即可
+
+  > 那么HTTP与HTTPS呢？ 请看[一遍见血的讲解#2](https://zhuanlan.zhihu.com/p/43789231) https安全吗？ （很安全）
+    1. 加密数据只有客户端和服务器端才能得到明文，客户端到服务端的通信过程是安全的。
+    2. 防止 _中间人攻击_ (因为http的内容是明文传输的，明文数据会经过中间代理服务器、路由器、wifi热点、通信服务运营商等多个物理节点，如果信息在传输过程中被劫持，传输的内容就完全暴露了。劫持者还可以篡改传输的信息且不被双方察觉)
+    3. ssl证书做到了防止中间人攻击 那么Charles与Fiddler等抓包软件是如何抓取https请求的呢? [浅谈Charles抓取HTTPS原理](https://www.jianshu.com/p/405f9d76f8c4)
+
+
+        > (前提是客户端选择信任并安装Charles的CA证书) 其实就是拦截了双方的请求，并且伪造了ca证书， 如果客户端不信任Charles的证书，其实Charles也没有办法。
+    
+     4. 如果我们不在浏览器请求, 比如在服务器上请求某个HTTPS的API 是否也会加密呢？ 
+
+        > 
+
+
 * cookie 与 session 的区别? 服务端如何清除 cookie? [more]
   > 主要区别在于, session 存在服务端, cookie 存在客户端. session 比 cookie 更安全. 而且 cookie 不一定一直能用 (可能被浏览器关掉). 服务端可以通过设置 cookie 的值为空并设置一个及时的 expires 来清除存在客户端上的 cookie.
 * HTTP 协议中的 POST 和 PUT 有什么区别? [more]
   > POST 是新建 (create) 资源, 非幂等, 同一个请求如果重复 POST 会新建多个资源. PUT 是 Update/Replace, 幂等, 同一个 PUT 请求重复操作会得到同样的结果.
 * 什么是跨域请求? 如何允许跨域? [more]
-  > 
+  > 出于安全考虑, 默认情况下使用 XMLHttpRequest 和 Fetch 发起 HTTP 请求必须遵守同源策略, 即只能向相同 host 请求 (host = hostname : port) 同源除了相同 host 也包括相同协议. 所以即使 host 相同, 从 HTTP 到 HTTPS 也属于跨域
+
+  > 向不同 host 的请求被称作跨域请求 (cross-origin HTTP request). 可以通过设置 CORS headers 即 Access-Control-Allow- 系列来允许跨域.
+
 * TCP/UDP 的区别? TCP 粘包是怎么回事，如何处理? UDP 有粘包吗? [more]
 * TIME_WAIT 是什么情况? 出现过多的 TIME_WAIT 可能是什么原因? [more]
 * ECONNRESET 是什么错误? 如何复现这个错误?
