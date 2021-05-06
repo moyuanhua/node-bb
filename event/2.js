@@ -1,5 +1,5 @@
 const EventEmitter = require('events')
-// const { inherits } = require('util')
+const { inherits } = require('util')
 
 
 function inherits(ctor, superCtor) {

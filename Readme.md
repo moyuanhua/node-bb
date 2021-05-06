@@ -325,7 +325,7 @@ getTotal.then((total) => {
 >  UDP 速度快, 开销低, 不用封包/拆包允许丢一部分数据, 监控统计/日志数据上报/流媒体通信等场景都可以用 UDP.
 
 > TCP粘包就是指发送方发送的若干包数据到达接收方时粘成了一包，从接收缓冲区来看，后一包数据的头紧接着前一包数据的尾，出现粘包的原因是多方面的，可能是来自发送方，也可能是来自接收方。
-> ### 解决办法
+> #### 解决办法
 > 1. 多次发送之前间隔一个等待时间
 > 2. 关闭 Nagle 算法
 > 3. 进行封包/拆包
@@ -346,3 +346,60 @@ getTotal.then((total) => {
 > 当我们访问一个域名时, 实际上需要的是访问对应的 IP 地址. 这时候, 获取 IP 地址的方式, 先是读取浏览器缓存, 如果未命中 => 接着读取本地 hosts 文件, 如果还是未命中 => 则向 DNS 服务器发送请求获取. 在向 DNS 服务器获取 IP 地址之前的行为, 叫做 DNS 本地解析.
 * 列举几个提高网络传输速度的办法?
 > zlib 压缩
+
+### OS
+1. 什么是 TTY? 如何判断是否处于 TTY 环境?
+  > "tty" 原意是指 "teletype" 即打字机, "pty" 则是 "pseudo-teletype" 即伪打字机. 在 Unix 中, /dev/tty* 是指任何表现的像打字机的设备, 例如终端 (terminal).
+
+  > 你可以通过 w 命令查看当前登录的用户情况, 你会发现每登录了一个窗口就会有一个新的 tty.
+2. 不同操作系统的换行符 (EOL) 有什么区别?
+  > end of line (EOL) 同 newline, line ending, 以及 line break.
+  #### LF
+  > 在 Unix 或 Unix 相容系统 (GNU/Linux, AIX, Xenix, Mac OS X, ...)、BeOS、Amiga、RISC OS
+  #### CR+LF	
+  > MS-DOS、微软视窗操作系统 (Microsoft Windows)、大部分非 Unix 的系统
+  #### CR
+  > Apple II 家族, Mac OS 至版本9
+
+  ### 错误处理/调试
+
+  1. 怎么处理未预料的出错? 用 try/catch , domains 还是其它什么
+  > [NodeJS 错误处理最佳实践](https://cnodejs.org/topic/55714dfac4e7fbea6e9a2e5d) 只要看他的
+  > 
+
+  TODO 使用一下技术搭建egg的一个框架
+  > 1.  [let it crash](http://wiki.c2.com/?LetItCrash) 有时候我们让程序崩溃重启是最好的解决方案
+  > 2.  [verror](https://www.npmjs.com/package/verror) 在nodejs里面优雅的处理错误
+  > 3.  [koa中间件处理错误](https://github.com/koajs/koa/wiki/Error-Handling)
+  > 4.  [debug](https://www.npmjs.com/package/debug)
+
+  ### 测试
+  1. 单元测试的必要性（要求速度还是质量）
+
+  ### util
+  1. HTTP 如何通过 GET 方法 (URL) 传递 let arr = [1,2,3,4] 给服务器?
+  > 通过第三方库qs实现对象或者数组的传递
+  2. Node.js 中继承 (util.inherits) 的实现?
+  ```JavaScript
+  exports.inherits = function(ctor, superCtor) {
+
+  if (ctor === undefined || ctor === null)
+    throw new TypeError('The constructor to "inherits" must not be ' +
+                        'null or undefined');
+
+  if (superCtor === undefined || superCtor === null)
+    throw new TypeError('The super constructor to "inherits" must not ' +
+                        'be null or undefined');
+
+  if (superCtor.prototype === undefined)
+    throw new TypeError('The super constructor to "inherits" must ' +
+                        'have a prototype');
+
+  ctor.super_ = superCtor;
+  Object.setPrototypeOf(ctor.prototype, superCtor.prototype);
+};
+  ```
+
+  ### 存储
+  1. [数据库范式](https://www.cnblogs.com/CareySon/archive/2010/02/16/1668803.html) 更好的设计数据库表格
+  2. mongo 与 mysql的区别与优势
